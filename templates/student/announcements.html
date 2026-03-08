@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Announcements — MACE{% endblock %}
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Clubs</div>
+<a href="{{ url_for('view_clubs') }}"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('my_clubs') }}"><i class="fas fa-star"></i> My Clubs</a>
+<div class="menu-section">Events</div>
+<a href="{{ url_for('student_events') }}"><i class="fas fa-calendar-alt"></i> Event Timeline</a>
+<a href="{{ url_for('my_events') }}"><i class="fas fa-list-check"></i> My Events</a>
+<div class="menu-section">More</div>
+<a href="{{ url_for('upload_certificate') }}"><i class="fas fa-certificate"></i> Upload Certificate</a>
+<a href="{{ url_for('activity_points') }}"><i class="fas fa-trophy"></i> Activity Points</a>
+<a href="{{ url_for('student_announcements') }}" class="active"><i class="fas fa-bullhorn"></i> Announcements</a>
+<a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a>
+{% endblock %}
+{% block content %}
+<div class="page-header"><h2>Announcements</h2><p>From your clubs and registered events</p></div>
+{% if announcements %}
+  {% for a in announcements %}
+  <div style="background:#fff;border-radius:10px;padding:20px 22px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,.07);border-left:4px solid var(--gold);">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <h4 style="color:var(--blue);font-size:15px;">{{ a.title }}</h4>
+      <span style="font-size:12px;color:var(--muted);">{{ a.created_date.strftime('%d %b %Y, %I:%M %p') if a.created_date else '' }}</span>
+    </div>
+    {% if a.club_name %}<span class="badge badge-info" style="margin:6px 0;">{{ a.club_name }}</span>{% endif %}
+    {% if a.event_name %}<span class="badge badge-gold" style="margin:6px 4px;">{{ a.event_name }}</span>{% endif %}
+    <p style="font-size:13.5px;color:#444;margin-top:8px;line-height:1.6;">{{ a.message }}</p>
+  </div>
+  {% endfor %}
+{% else %}
+<div class="empty-state">
+  <i class="fas fa-bullhorn"></i>
+  <h4>No announcements yet</h4>
+  <p>Join clubs and register for events to see announcements here.</p>
+</div>
+{% endif %}
+{% endblock %}

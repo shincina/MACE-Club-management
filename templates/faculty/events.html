@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Club Events — MACE{% endblock %}
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('faculty_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Club</div>
+<a href="{{ url_for('faculty_view_club') }}"><i class="fas fa-users"></i> My Club Members</a>
+<a href="{{ url_for('faculty_view_events') }}" class="active"><i class="fas fa-calendar-alt"></i> Club Events</a>
+<div class="menu-section">Class</div>
+<a href="{{ url_for('faculty_view_class') }}"><i class="fas fa-chalkboard-teacher"></i> View My Class</a>
+{% endblock %}
+{% block content %}
+<div class="page-header"><h2>Club Events</h2><p>All events from your clubs</p></div>
+<div class="table-card">
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr><th>Event</th><th>Club</th><th>Date</th><th>Location</th><th>Points</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for e in events %}
+        <tr>
+          <td><strong>{{ e.event_name }}</strong></td>
+          <td>{{ e.club_name }}</td>
+          <td>{{ e.event_date }}</td>
+          <td>{{ e.location }}</td>
+          <td>{{ e.points }}</td>
+          <td>
+            {% if e.status == 'approved' %}<span class="badge badge-success">Approved</span>
+            {% elif e.status == 'pending' %}<span class="badge badge-warning">Pending</span>
+            {% elif e.status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+            {% else %}<span class="badge badge-secondary">{{ e.status }}</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px;">No events found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

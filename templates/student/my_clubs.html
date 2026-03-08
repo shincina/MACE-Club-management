@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}My Clubs — MACE{% endblock %}
+
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Clubs</div>
+<a href="{{ url_for('view_clubs') }}"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('my_clubs') }}" class="active"><i class="fas fa-star"></i> My Clubs</a>
+<div class="menu-section">Events</div>
+<a href="{{ url_for('student_events') }}"><i class="fas fa-calendar-alt"></i> Event Timeline</a>
+<a href="{{ url_for('my_events') }}"><i class="fas fa-list-check"></i> My Events</a>
+<div class="menu-section">More</div>
+<a href="{{ url_for('upload_certificate') }}"><i class="fas fa-certificate"></i> Upload Certificate</a>
+<a href="{{ url_for('activity_points') }}"><i class="fas fa-trophy"></i> Activity Points</a>
+<a href="{{ url_for('student_announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+<a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>My Clubs</h2>
+  <p>Your current club memberships</p>
+</div>
+
+{% if my_clubs %}
+<div class="table-card">
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Club Name</th>
+          <th>Type</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for club in my_clubs %}
+        <tr>
+          <td><strong>{{ club.club_name }}</strong></td>
+          <td>{{ club.club_type }}</td>
+          <td>
+            {% if club.role == 'coordinator' %}
+              <span class="badge badge-gold"><i class="fas fa-star"></i> Coordinator</span>
+            {% else %}
+              <span class="badge badge-info">Member</span>
+            {% endif %}
+          </td>
+          <td>{{ club.join_date }}</td>
+          <td>
+            {% if club.mem_status == 'approved' %}
+              <span class="badge badge-success">Active</span>
+            {% elif club.mem_status == 'pending' %}
+              <span class="badge badge-warning">Pending</span>
+            {% else %}
+              <span class="badge badge-danger">Rejected</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if club.mem_status == 'approved' and club.role != 'coordinator' %}
+            <form method="POST" action="{{ url_for('leave_club', club_id=club.club_id) }}"
+                  onsubmit="return confirmAction('Leave {{ club.club_name }}?')">
+              <button class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Leave</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="fas fa-star"></i>
+  <h4>You haven't joined any clubs yet</h4>
+  <p><a href="{{ url_for('view_clubs') }}" class="btn btn-primary" style="margin-top:12px">Browse Clubs</a></p>
+</div>
+{% endif %}
+{% endblock %}

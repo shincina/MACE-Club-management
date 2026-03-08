@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}My Events — MACE{% endblock %}
+
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Clubs</div>
+<a href="{{ url_for('view_clubs') }}"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('my_clubs') }}"><i class="fas fa-star"></i> My Clubs</a>
+<div class="menu-section">Events</div>
+<a href="{{ url_for('student_events') }}"><i class="fas fa-calendar-alt"></i> Event Timeline</a>
+<a href="{{ url_for('my_events') }}" class="active"><i class="fas fa-list-check"></i> My Events</a>
+<div class="menu-section">More</div>
+<a href="{{ url_for('upload_certificate') }}"><i class="fas fa-certificate"></i> Upload Certificate</a>
+<a href="{{ url_for('activity_points') }}"><i class="fas fa-trophy"></i> Activity Points</a>
+<a href="{{ url_for('student_announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+<a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>My Events</h2>
+  <p>All events you have registered for</p>
+</div>
+
+{% if my_events %}
+<div class="table-card">
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Club</th>
+          <th>Date</th>
+          <th>Location</th>
+          <th>Attendance</th>
+          <th>Payment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in my_events %}
+        <tr>
+          <td><strong>{{ e.event_name }}</strong></td>
+          <td>{{ e.club_name }}</td>
+          <td>{{ e.event_date }}</td>
+          <td>{{ e.location }}</td>
+          <td>
+            {% if e.attendance_status == 'present' %}
+              <span class="badge badge-success">Present</span>
+            {% else %}
+              <span class="badge badge-secondary">Absent</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if e.payment_status == 'paid' %}
+              <span class="badge badge-success">Paid</span>
+            {% else %}
+              <span class="badge badge-warning">Not Paid</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="fas fa-list-check"></i>
+  <h4>No registered events yet</h4>
+  <p><a href="{{ url_for('student_events') }}" class="btn btn-primary" style="margin-top:12px">Browse Events</a></p>
+</div>
+{% endif %}
+{% endblock %}

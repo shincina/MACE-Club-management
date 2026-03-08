@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Post Announcement — MACE{% endblock %}
+{% block sidebar %}
+<div class="menu-section">Coordinator</div>
+<a href="{{ url_for('coordinator_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+<a href="{{ url_for('create_event') }}"><i class="fas fa-plus-circle"></i> Create Event</a>
+<a href="{{ url_for('coordinator_members') }}"><i class="fas fa-users"></i> Members</a>
+<a href="{{ url_for('post_announcement') }}" class="active"><i class="fas fa-bullhorn"></i> Post Announcement</a>
+{% endblock %}
+{% block content %}
+<div class="page-header"><h2>Post Announcement</h2><p>Notify your club members</p></div>
+<div class="form-card" style="max-width:560px;">
+  <h3><i class="fas fa-bullhorn" style="margin-right:8px;color:var(--gold)"></i>New Announcement</h3>
+  <form method="POST">
+    <div class="form-group">
+      <label>Club</label>
+      <select name="club_id" required>
+        <option value="">-- Select Club --</option>
+        {% for club in coord_clubs %}
+        <option value="{{ club.club_id }}">{{ club.club_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" name="title" placeholder="Announcement title" required/>
+    </div>
+    <div class="form-group">
+      <label>Message</label>
+      <textarea name="message" rows="5" placeholder="Write your announcement here..." required></textarea>
+    </div>
+    <button type="submit" class="btn btn-gold"><i class="fas fa-paper-plane"></i> Post Announcement</button>
+  </form>
+</div>
+{% endblock %}

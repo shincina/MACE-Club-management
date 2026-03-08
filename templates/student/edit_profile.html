@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile — MACE{% endblock %}
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Clubs</div>
+<a href="{{ url_for('view_clubs') }}"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('my_clubs') }}"><i class="fas fa-star"></i> My Clubs</a>
+<div class="menu-section">Events</div>
+<a href="{{ url_for('student_events') }}"><i class="fas fa-calendar-alt"></i> Event Timeline</a>
+<a href="{{ url_for('my_events') }}"><i class="fas fa-list-check"></i> My Events</a>
+<div class="menu-section">More</div>
+<a href="{{ url_for('upload_certificate') }}"><i class="fas fa-certificate"></i> Upload Certificate</a>
+<a href="{{ url_for('activity_points') }}"><i class="fas fa-trophy"></i> Activity Points</a>
+<a href="{{ url_for('student_announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+<a href="{{ url_for('student_profile') }}" class="active"><i class="fas fa-user"></i> Profile</a>
+{% endblock %}
+{% block content %}
+<div class="page-header"><h2>Edit Profile</h2></div>
+<div class="form-card" style="max-width:480px;">
+  <h3><i class="fas fa-edit" style="margin-right:8px;color:var(--gold)"></i>Update Details</h3>
+  <form method="POST">
+    <div class="form-group">
+      <label>Phone Number</label>
+      <input type="text" name="phone" value="{{ student.phone or '' }}" placeholder="e.g. 9876543210"/>
+    </div>
+    <div style="display:flex;gap:12px;">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+      <a href="{{ url_for('student_profile') }}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

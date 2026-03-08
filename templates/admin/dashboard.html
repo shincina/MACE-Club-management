@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard — MACE{% endblock %}
+
+{% block sidebar %}
+<div class="menu-section">Admin</div>
+<a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+<div class="menu-section">Manage</div>
+<a href="{{ url_for('admin_departments') }}"><i class="fas fa-building"></i> Departments</a>
+<a href="{{ url_for('admin_students') }}"><i class="fas fa-user-graduate"></i> Students</a>
+<a href="{{ url_for('admin_faculty') }}"><i class="fas fa-chalkboard-teacher"></i> Faculty</a>
+<a href="{{ url_for('admin_clubs') }}"><i class="fas fa-users"></i> Clubs</a>
+<a href="{{ url_for('admin_memberships') }}"><i class="fas fa-id-card"></i> Memberships</a>
+<a href="{{ url_for('admin_events') }}"><i class="fas fa-calendar-alt"></i> Events</a>
+<div class="menu-section">Reports</div>
+<a href="{{ url_for('admin_reports') }}"><i class="fas fa-chart-bar"></i> AP Reports</a>
+<a href="{{ url_for('admin_announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Admin Dashboard</h2>
+  <p>MACE Club Activity Points System — Overview</p>
+</div>
+
+<div class="cards-grid">
+  <div class="stat-card blue">
+    <i class="fas fa-user-graduate stat-card-icon"></i>
+    <div class="stat-card-value">{{ total_students }}</div>
+    <div class="stat-card-label">Total Students</div>
+  </div>
+  <div class="stat-card gold">
+    <i class="fas fa-users stat-card-icon"></i>
+    <div class="stat-card-value">{{ active_clubs }}</div>
+    <div class="stat-card-label">Active Clubs</div>
+  </div>
+  <div class="stat-card blue">
+    <i class="fas fa-calendar stat-card-icon"></i>
+    <div class="stat-card-value">{{ total_events }}</div>
+    <div class="stat-card-label">Approved Events</div>
+  </div>
+  <div class="stat-card green">
+    <i class="fas fa-graduation-cap stat-card-icon"></i>
+    <div class="stat-card-value">{{ eligible_students }}</div>
+    <div class="stat-card-label">Graduation Eligible</div>
+  </div>
+  <div class="stat-card gold">
+    <i class="fas fa-user-clock stat-card-icon"></i>
+    <div class="stat-card-value">{{ pending_memberships }}</div>
+    <div class="stat-card-label">Pending Memberships</div>
+  </div>
+  <div class="stat-card red">
+    <i class="fas fa-certificate stat-card-icon"></i>
+    <div class="stat-card-value">{{ pending_certs }}</div>
+    <div class="stat-card-label">Pending Certificates</div>
+  </div>
+</div>
+
+<!-- Top clubs -->
+<div class="table-card">
+  <div class="table-card-header">
+    <h3><i class="fas fa-crown" style="margin-right:8px;color:var(--gold)"></i>Top Clubs by Membership</h3>
+  </div>
+  <div class="table-responsive">
+    <table>
+      <thead><tr><th>Rank</th><th>Club</th><th>Members</th></tr></thead>
+      <tbody>
+        {% for club in top_clubs %}
+        <tr>
+          <td><strong style="color:var(--gold);">#{{ loop.index }}</strong></td>
+          <td>{{ club.club_name }}</td>
+          <td>{{ club.members }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

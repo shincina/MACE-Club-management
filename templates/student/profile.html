@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Profile — MACE{% endblock %}
+
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Clubs</div>
+<a href="{{ url_for('view_clubs') }}"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('my_clubs') }}"><i class="fas fa-star"></i> My Clubs</a>
+<div class="menu-section">Events</div>
+<a href="{{ url_for('student_events') }}"><i class="fas fa-calendar-alt"></i> Event Timeline</a>
+<a href="{{ url_for('my_events') }}"><i class="fas fa-list-check"></i> My Events</a>
+<div class="menu-section">More</div>
+<a href="{{ url_for('upload_certificate') }}"><i class="fas fa-certificate"></i> Upload Certificate</a>
+<a href="{{ url_for('activity_points') }}"><i class="fas fa-trophy"></i> Activity Points</a>
+<a href="{{ url_for('student_announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+<a href="{{ url_for('student_profile') }}" class="active"><i class="fas fa-user"></i> Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>My Profile</h2>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 2fr; gap:22px; align-items:start;">
+
+  <!-- Avatar card -->
+  <div class="form-card" style="text-align:center;">
+    <div style="width:90px;height:90px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+      <i class="fas fa-user" style="font-size:38px;color:#fff;"></i>
+    </div>
+    <h3 style="border:none;margin-bottom:4px;font-size:18px;">{{ student.name }}</h3>
+    <p style="color:var(--muted);font-size:13px;">{{ student.reg_no }}</p>
+    <span class="badge badge-info" style="margin-top:8px;">{{ student.semester }}</span>
+    <div style="margin-top:20px;">
+      <div style="font-size:28px;font-weight:800;color:var(--gold);">{{ student.total_points }}</div>
+      <div style="font-size:12px;color:var(--muted);">Activity Points</div>
+    </div>
+  </div>
+
+  <!-- Details card -->
+  <div class="form-card">
+    <h3><i class="fas fa-id-card" style="margin-right:8px;color:var(--gold)"></i>Student Details</h3>
+    <table style="width:100%;font-size:14px;">
+      <tbody>
+        <tr><td style="padding:10px 0;color:var(--muted);width:40%;">Full Name</td><td><strong>{{ student.name }}</strong></td></tr>
+        <tr><td style="padding:10px 0;color:var(--muted);">Register No.</td><td><strong>{{ student.reg_no }}</strong></td></tr>
+        <tr><td style="padding:10px 0;color:var(--muted);">Email</td><td>{{ student.email }}</td></tr>
+        <tr><td style="padding:10px 0;color:var(--muted);">Phone</td><td>{{ student.phone or '—' }}</td></tr>
+        <tr><td style="padding:10px 0;color:var(--muted);">Department</td><td>{{ student.dept_name }}</td></tr>
+        <tr><td style="padding:10px 0;color:var(--muted);">Semester</td><td>{{ student.semester }}</td></tr>
+        <tr>
+          <td style="padding:10px 0;color:var(--muted);">Graduation Status</td>
+          <td>
+            {% if student.total_points >= 100 %}
+              <span class="badge badge-success"><i class="fas fa-check"></i> Eligible</span>
+            {% else %}
+              <span class="badge badge-danger">Not Yet Eligible ({{ 100 - student.total_points }} pts needed)</span>
+            {% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:20px;">
+      <a href="{{ url_for('edit_profile') }}" class="btn btn-outline">
+        <i class="fas fa-edit"></i> Edit Profile
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

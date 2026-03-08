@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Members — MACE{% endblock %}
+{% block sidebar %}
+<div class="menu-section">Coordinator</div>
+<a href="{{ url_for('coordinator_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+<a href="{{ url_for('create_event') }}"><i class="fas fa-plus-circle"></i> Create Event</a>
+<a href="{{ url_for('coordinator_members') }}" class="active"><i class="fas fa-users"></i> Members</a>
+<a href="{{ url_for('post_announcement') }}"><i class="fas fa-bullhorn"></i> Post Announcement</a>
+{% endblock %}
+{% block content %}
+<div class="page-header"><h2>Club Members</h2><p>All approved members in your clubs</p></div>
+<div class="table-card">
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Reg No</th><th>Semester</th><th>Club</th><th>Role</th><th>Activity Points</th></tr>
+      </thead>
+      <tbody>
+        {% for m in members %}
+        <tr>
+          <td><strong>{{ m.name }}</strong></td>
+          <td>{{ m.reg_no }}</td>
+          <td>{{ m.semester }}</td>
+          <td>{{ m.club_name }}</td>
+          <td>
+            {% if m.role == 'coordinator' %}
+              <span class="badge badge-gold">Coordinator</span>
+            {% else %}
+              <span class="badge badge-info">Member</span>
+            {% endif %}
+          </td>
+          <td><strong {% if m.total_points >= 100 %}style="color:#2e7d32"{% endif %}>{{ m.total_points }}</strong></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted);">No members yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

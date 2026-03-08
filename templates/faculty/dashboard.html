@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Faculty Dashboard — MACE{% endblock %}
+
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('faculty_dashboard') }}" class="active"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Club</div>
+<a href="{{ url_for('faculty_view_club') }}"><i class="fas fa-users"></i> My Club Members</a>
+<a href="{{ url_for('faculty_view_events') }}"><i class="fas fa-calendar-alt"></i> Club Events</a>
+<div class="menu-section">Approvals</div>
+<a href="{{ url_for('faculty_dashboard') }}#events"><i class="fas fa-check-circle"></i> Approve Events</a>
+<a href="{{ url_for('faculty_dashboard') }}#certs"><i class="fas fa-certificate"></i> Approve Certificates</a>
+<div class="menu-section">Class</div>
+<a href="{{ url_for('faculty_view_class') }}"><i class="fas fa-chalkboard-teacher"></i> View My Class</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Faculty Dashboard</h2>
+  <p>Welcome back, {{ session.name }}</p>
+</div>
+
+<!-- Summary cards -->
+<div class="cards-grid">
+  <div class="stat-card blue">
+    <i class="fas fa-users stat-card-icon"></i>
+    <div class="stat-card-value">{{ my_clubs | length }}</div>
+    <div class="stat-card-label">Clubs In-Charge</div>
+  </div>
+  <div class="stat-card gold">
+    <i class="fas fa-calendar stat-card-icon"></i>
+    <div class="stat-card-value">{{ pending_events | length }}</div>
+    <div class="stat-card-label">Pending Event Approvals</div>
+  </div>
+  <div class="stat-card red">
+    <i class="fas fa-certificate stat-card-icon"></i>
+    <div class="stat-card-value">{{ pending_certs | length }}</div>
+    <div class="stat-card-label">Pending Certificates</div>
+  </div>
+</div>
+
+<!-- Pending Events -->
+<div class="table-card" id="events">
+  <div class="table-card-header">
+    <h3><i class="fas fa-calendar-check" style="margin-right:8px;color:var(--gold)"></i>Pending Event Approvals</h3>
+  </div>
+  {% if pending_events %}
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr><th>Event</th><th>Club</th><th>Date</th><th>Points</th><th>Max Participants</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for event in pending_events %}
+        <tr>
+          <td><strong>{{ event.event_name }}</strong><br><small style="color:var(--muted)">{{ event.location }}</small></td>
+          <td>{{ event.club_name }}</td>
+          <td>{{ event.event_date }}</td>
+          <td><span class="badge badge-gold">{{ event.points }} pts</span></td>
+          <td>{{ event.max_participants }}</td>
+          <td>
+            <div style="display:flex;gap:8px;">
+              <form method="POST" action="{{ url_for('approve_event', event_id=event.event_id) }}">
+                <input type="hidden" name="action" value="approve"/>
+                <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Approve</button>
+              </form>
+              <form method="POST" action="{{ url_for('approve_event', event_id=event.event_id) }}">
+                <input type="hidden" name="action" value="reject"/>
+                <button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Reject</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding:30px;">
+    <i class="fas fa-check-circle" style="color:#2e7d32;opacity:.4;"></i>
+    <h4>No pending events</h4>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Pending Certificates -->
+<div class="table-card" id="certs">
+  <div class="table-card-header">
+    <h3><i class="fas fa-certificate" style="margin-right:8px;color:var(--gold)"></i>Pending Certificate Approvals</h3>
+  </div>
+  {% if pending_certs %}
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr><th>Student</th><th>Reg No</th><th>Semester</th><th>Activity</th><th>Uploaded</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for cert in pending_certs %}
+        <tr>
+          <td><strong>{{ cert.student_name }}</strong></td>
+          <td>{{ cert.reg_no }}</td>
+          <td>{{ cert.semester }}</td>
+          <td>
+            <span class="badge badge-info">{{ cert.activity_category | replace('_',' ') | title if cert.activity_category else cert.certificate_type }}</span>
+          </td>
+          <td>{{ cert.upload_date.strftime('%d %b %Y') if cert.upload_date else '—' }}</td>
+          <td>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <form method="POST" action="{{ url_for('approve_cert', cert_id=cert.certificate_id) }}" style="display:flex;gap:6px;align-items:center;">
+                <input type="hidden" name="action" value="approve"/>
+                <input type="text" name="remarks" placeholder="Remarks (optional)" style="padding:5px 8px;border:1px solid #ccc;border-radius:6px;font-size:12px;width:130px;"/>
+                <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Approve</button>
+              </form>
+              <form method="POST" action="{{ url_for('approve_cert', cert_id=cert.certificate_id) }}">
+                <input type="hidden" name="action" value="reject"/>
+                <button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Reject</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding:30px;">
+    <i class="fas fa-check-circle" style="color:#2e7d32;opacity:.4;"></i>
+    <h4>No pending certificates</h4>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

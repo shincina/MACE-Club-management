@@ -1,0 +1,7 @@
+pip install flask
+pip install flask-mysqldb
+pip install flask-login
+pip install flask-session
+pip install werkzeug
+pip install pillow
+

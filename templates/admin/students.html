@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Students — Admin{% endblock %}
+{% block sidebar %}
+<div class="menu-section">Admin</div>
+<a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+<div class="menu-section">Manage</div>
+<a href="{{ url_for('admin_departments') }}"><i class="fas fa-building"></i> Departments</a>
+<a href="{{ url_for('admin_students') }}" class="active"><i class="fas fa-user-graduate"></i> Students</a>
+<a href="{{ url_for('admin_faculty') }}"><i class="fas fa-chalkboard-teacher"></i> Faculty</a>
+<a href="{{ url_for('admin_clubs') }}"><i class="fas fa-users"></i> Clubs</a>
+<a href="{{ url_for('admin_memberships') }}"><i class="fas fa-id-card"></i> Memberships</a>
+<a href="{{ url_for('admin_events') }}"><i class="fas fa-calendar-alt"></i> Events</a>
+<div class="menu-section">Reports</div>
+<a href="{{ url_for('admin_reports') }}"><i class="fas fa-chart-bar"></i> AP Reports</a>
+{% endblock %}
+{% block content %}
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+  <div><h2>Students</h2><p>Manage all registered students</p></div>
+  <button onclick="document.getElementById('addModal').classList.add('open')" class="btn btn-gold">
+    <i class="fas fa-plus"></i> Add Student
+  </button>
+</div>
+
+<div class="table-card">
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr><th>Reg No</th><th>Name</th><th>Department</th><th>Semester</th><th>Email</th><th>Points</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>{{ s.reg_no }}</td>
+          <td><strong>{{ s.name }}</strong></td>
+          <td>{{ s.dept_name }}</td>
+          <td>{{ s.semester }}</td>
+          <td>{{ s.email }}</td>
+          <td><strong {% if s.total_points >= 100 %}style="color:#2e7d32"{% endif %}>{{ s.total_points }}</strong></td>
+          <td>
+            <form method="POST" onsubmit="return confirmAction('Delete student {{ s.name }}?')">
+              <input type="hidden" name="action" value="delete"/>
+              <input type="hidden" name="reg_no" value="{{ s.reg_no }}"/>
+              <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('addModal').classList.remove('open')">×</button>
+    <h3><i class="fas fa-user-plus" style="margin-right:8px;color:var(--gold)"></i>Add New Student</h3>
+    <form method="POST">
+      <input type="hidden" name="action" value="add"/>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Register No.</label>
+          <input type="text" name="reg_no" placeholder="e.g. B24CS001" required/>
+        </div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="name" required/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="reg@mace.ac.in" required/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" name="phone"/>
+        </div>
+        <div class="form-group">
+          <label>Semester</label>
+          <select name="semester" required>
+            {% for s in ['S1','S2','S3','S4','S5','S6','S7','S8'] %}
+            <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Department</label>
+        <select name="dept_id" required>
+          {% for d in departments %}
+          <option value="{{ d.dept_id }}">{{ d.dept_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="text" name="password" value="student123" required/>
+      </div>
+      <button type="submit" class="btn btn-gold" style="width:100%"><i class="fas fa-save"></i> Add Student</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

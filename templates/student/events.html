@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Events — MACE{% endblock %}
+
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Clubs</div>
+<a href="{{ url_for('view_clubs') }}"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('my_clubs') }}"><i class="fas fa-star"></i> My Clubs</a>
+<div class="menu-section">Events</div>
+<a href="{{ url_for('student_events') }}" class="active"><i class="fas fa-calendar-alt"></i> Event Timeline</a>
+<a href="{{ url_for('my_events') }}"><i class="fas fa-list-check"></i> My Events</a>
+<div class="menu-section">More</div>
+<a href="{{ url_for('upload_certificate') }}"><i class="fas fa-certificate"></i> Upload Certificate</a>
+<a href="{{ url_for('activity_points') }}"><i class="fas fa-trophy"></i> Activity Points</a>
+<a href="{{ url_for('student_announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+<a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Upcoming Events</h2>
+  <p>Browse and register for approved club events</p>
+</div>
+
+{% if events %}
+<div class="event-timeline">
+  {% for event in events %}
+  <div class="event-item">
+    <div class="event-card">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+        <div>
+          <div class="event-title">{{ event.event_name }}</div>
+          <div class="event-meta">
+            <span><i class="fas fa-users"></i> {{ event.club_name }}</span>
+            <span><i class="fas fa-calendar"></i> {{ event.event_date }}</span>
+            <span><i class="fas fa-clock"></i> {{ event.event_time }}</span>
+            <span><i class="fas fa-map-marker-alt"></i> {{ event.location }}</span>
+            <span><i class="fas fa-trophy"></i> {{ event.points }} pts</span>
+            <span><i class="fas fa-users"></i> {{ event.registered_count }}/{{ event.max_participants }}</span>
+          </div>
+          {% if event.description %}
+          <p style="font-size:13px; color:#555; margin-top:6px;">{{ event.description }}</p>
+          {% endif %}
+        </div>
+        <div>
+          {% if event.is_registered %}
+            <span class="badge badge-success"><i class="fas fa-check"></i> Registered</span>
+          {% elif event.registered_count >= event.max_participants %}
+            <span class="badge badge-danger">Full</span>
+          {% else %}
+            <form method="POST" action="{{ url_for('register_event', event_id=event.event_id) }}">
+              <button class="btn btn-gold btn-sm"><i class="fas fa-plus"></i> Register</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="fas fa-calendar-alt"></i>
+  <h4>No upcoming events</h4>
+  <p>Check back later for new events from your clubs.</p>
+</div>
+{% endif %}
+{% endblock %}

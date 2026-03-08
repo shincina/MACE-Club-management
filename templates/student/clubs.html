@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}View Clubs — MACE{% endblock %}
+
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Clubs</div>
+<a href="{{ url_for('view_clubs') }}" class="active"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('my_clubs') }}"><i class="fas fa-star"></i> My Clubs</a>
+<div class="menu-section">Events</div>
+<a href="{{ url_for('student_events') }}"><i class="fas fa-calendar-alt"></i> Event Timeline</a>
+<a href="{{ url_for('my_events') }}"><i class="fas fa-list-check"></i> My Events</a>
+<div class="menu-section">More</div>
+<a href="{{ url_for('upload_certificate') }}"><i class="fas fa-certificate"></i> Upload Certificate</a>
+<a href="{{ url_for('activity_points') }}"><i class="fas fa-trophy"></i> Activity Points</a>
+<a href="{{ url_for('student_announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+<a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>All Clubs</h2>
+  <p>Browse and join clubs — you can be part of up to 5 clubs</p>
+</div>
+
+{% if clubs %}
+<div class="clubs-grid">
+  {% for club in clubs %}
+  <div class="club-card">
+    <div class="club-card-top">
+      <span class="club-type-badge">{{ club.club_type }}</span>
+      <h3>{{ club.club_name }}</h3>
+    </div>
+    <div class="club-card-body">
+      <div class="info-row"><i class="fas fa-chalkboard-teacher"></i> {{ club.faculty_name }}</div>
+      <div class="info-row"><i class="fas fa-users"></i> {{ club.member_count }} members</div>
+    </div>
+    <div class="club-card-footer">
+      {% if club.my_status == 'approved' %}
+        <span class="badge badge-success"><i class="fas fa-check"></i> Joined</span>
+      {% elif club.my_status == 'pending' %}
+        <span class="badge badge-warning"><i class="fas fa-clock"></i> Pending</span>
+      {% else %}
+        <form method="POST" action="{{ url_for('join_club', club_id=club.club_id) }}">
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Join
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <i class="fas fa-users"></i>
+  <h4>No clubs available</h4>
+  <p>Check back later.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}My Class — MACE{% endblock %}
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('faculty_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Club</div>
+<a href="{{ url_for('faculty_view_club') }}"><i class="fas fa-users"></i> My Club Members</a>
+<a href="{{ url_for('faculty_view_events') }}"><i class="fas fa-calendar-alt"></i> Club Events</a>
+<div class="menu-section">Class</div>
+<a href="{{ url_for('faculty_view_class') }}" class="active"><i class="fas fa-chalkboard-teacher"></i> View My Class</a>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Class: {{ class_code }}</h2>
+  <p>Students in your assigned class</p>
+</div>
+<div class="table-card">
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr><th>Reg No</th><th>Name</th><th>Department</th><th>Email</th><th>Activity Points</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>{{ s.reg_no }}</td>
+          <td><strong>{{ s.name }}</strong></td>
+          <td>{{ s.dept_name }}</td>
+          <td>{{ s.email }}</td>
+          <td><strong {% if s.total_points >= 100 %}style="color:#2e7d32"{% endif %}>{{ s.total_points }}</strong></td>
+          <td>
+            {% if s.total_points >= 100 %}
+              <span class="badge badge-success">Eligible</span>
+            {% else %}
+              <span class="badge badge-warning">{{ 100 - s.total_points }} pts needed</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted);">No students found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

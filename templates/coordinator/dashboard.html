@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}Coordinator Dashboard — MACE{% endblock %}
+
+{% block sidebar %}
+<div class="menu-section">Coordinator</div>
+<a href="{{ url_for('coordinator_dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+<a href="{{ url_for('create_event') }}"><i class="fas fa-plus-circle"></i> Create Event</a>
+<a href="{{ url_for('coordinator_members') }}"><i class="fas fa-users"></i> Members</a>
+<a href="{{ url_for('post_announcement') }}"><i class="fas fa-bullhorn"></i> Post Announcement</a>
+<div class="menu-section">Student</div>
+<a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Student Dashboard</a>
+<a href="{{ url_for('view_clubs') }}"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('student_events') }}"><i class="fas fa-calendar-alt"></i> Events</a>
+<a href="{{ url_for('activity_points') }}"><i class="fas fa-trophy"></i> Activity Points</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Coordinator Dashboard</h2>
+  <p>Manage your club — {{ coord_clubs | map(attribute='club_name') | join(', ') }}</p>
+</div>
+
+<div class="cards-grid">
+  <div class="stat-card gold">
+    <i class="fas fa-clock stat-card-icon"></i>
+    <div class="stat-card-value">{{ pending_memberships | length }}</div>
+    <div class="stat-card-label">Pending Requests</div>
+  </div>
+  <div class="stat-card blue">
+    <i class="fas fa-calendar stat-card-icon"></i>
+    <div class="stat-card-value">{{ club_events | length }}</div>
+    <div class="stat-card-label">Total Events</div>
+  </div>
+  <div class="stat-card green">
+    <i class="fas fa-check stat-card-icon"></i>
+    <div class="stat-card-value">{{ club_events | selectattr('status','eq','approved') | list | length }}</div>
+    <div class="stat-card-label">Approved Events</div>
+  </div>
+</div>
+
+<!-- Pending membership requests -->
+{% if pending_memberships %}
+<div class="table-card">
+  <div class="table-card-header">
+    <h3><i class="fas fa-user-clock" style="margin-right:8px;color:var(--gold)"></i>Pending Membership Requests</h3>
+  </div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr><th>Student</th><th>Reg No</th><th>Semester</th><th>Club</th><th>Requested</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for m in pending_memberships %}
+        <tr>
+          <td><strong>{{ m.name }}</strong></td>
+          <td>{{ m.reg_no }}</td>
+          <td>{{ m.semester }}</td>
+          <td>{{ m.club_name }}</td>
+          <td>{{ m.join_date }}</td>
+          <td>
+            <div style="display:flex;gap:8px;">
+              <form method="POST" action="{{ url_for('approve_member', membership_id=m.membership_id) }}">
+                <input type="hidden" name="action" value="approve"/>
+                <button class="btn btn-success btn-sm"><i class="fas fa-check"></i> Approve</button>
+              </form>
+              <form method="POST" action="{{ url_for('approve_member', membership_id=m.membership_id) }}">
+                <input type="hidden" name="action" value="reject"/>
+                <button class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Reject</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Club events -->
+<div class="table-card">
+  <div class="table-card-header">
+    <h3><i class="fas fa-calendar-alt" style="margin-right:8px;color:var(--gold)"></i>Club Events</h3>
+    <a href="{{ url_for('create_event') }}" class="btn btn-gold btn-sm"><i class="fas fa-plus"></i> New Event</a>
+  </div>
+  {% if club_events %}
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr><th>Event</th><th>Club</th><th>Date</th><th>Registered</th><th>Points</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for e in club_events %}
+        <tr>
+          <td><strong>{{ e.event_name }}</strong></td>
+          <td>{{ e.club_name }}</td>
+          <td>{{ e.event_date }}</td>
+          <td>{{ e.registered_count }} / {{ e.max_participants }}</td>
+          <td>{{ e.points }}</td>
+          <td>
+            {% if e.status == 'approved' %}<span class="badge badge-success">Approved</span>
+            {% elif e.status == 'pending' %}<span class="badge badge-warning">Pending</span>
+            {% elif e.status == 'completed' %}<span class="badge badge-secondary">Completed</span>
+            {% else %}<span class="badge badge-danger">Rejected</span>{% endif %}
+          </td>
+          <td>
+            {% if e.status == 'approved' %}
+            <a href="{{ url_for('mark_attendance', event_id=e.event_id) }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-clipboard-check"></i> Attendance
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding:30px;">
+    <i class="fas fa-calendar"></i>
+    <h4>No events yet</h4>
+    <p><a href="{{ url_for('create_event') }}" class="btn btn-gold" style="margin-top:10px">Create First Event</a></p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

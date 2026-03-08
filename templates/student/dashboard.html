@@ -1,0 +1,45 @@
+<!-- templates/student/dashboard.html -->
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+
+
+{% block sidebar %}
+<div class='menu-section'>Main</div>
+<a href='/student/dashboard'><i class='fa fa-home'></i>  Dashboard</a>
+<div class='menu-section'>Clubs</div>
+<a href='/student/clubs'><i class='fa fa-users'></i>  View Clubs</a>
+<a href='/student/my_clubs'><i class='fa fa-star'></i>  My Clubs</a>
+<div class='menu-section'>Events</div>
+<a href='/student/events'><i class='fa fa-calendar'></i>  Event Timeline</a>
+<a href='/student/my_events'><i class='fa fa-list'></i>  My Events</a>
+<div class='menu-section'>More</div>
+<a href='/student/certificates'><i class='fa fa-certificate'></i>  Certificates</a>
+<a href='/student/activity_points'><i class='fa fa-trophy'></i>  Activity Points</a>
+<a href='/student/profile'><i class='fa fa-user'></i>  Profile</a>
+{% endblock %}
+
+
+{% block content %}
+<h2 style='color:#1B3A6B; margin-bottom:24px;'>Welcome, {{ student.name }}!</h2>
+
+
+<div class='cards-grid'>
+  <div class='card'><div class='card-value'>{{ clubs_count }}</div>
+    <div class='card-label'>Clubs Joined</div></div>
+  <div class='card gold'><div class='card-value'>{{ student.total_points }}</div>
+    <div class='card-label'>Activity Points</div></div>
+  <div class='card'><div class='card-value'>{{ upcoming|length }}</div>
+    <div class='card-label'>Upcoming Events</div></div>
+</div>
+
+
+<!-- Progress Bar -->
+<div class='card' style='margin-bottom:20px;'>
+  <b>Graduation Progress (100 AP Required)</b>
+  {% set pct = [student.total_points, 100]|min %}
+  <div class='progress-wrap' style='margin-top:12px;'>
+    <div class='progress-bar' style='width:{{ pct }}%;'></div>
+  </div>
+  <small>{{ student.total_points }} / 100 points</small>
+</div>
+{% endblock %}

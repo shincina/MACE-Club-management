@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Mark Attendance — MACE{% endblock %}
+{% block sidebar %}
+<div class="menu-section">Coordinator</div>
+<a href="{{ url_for('coordinator_dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+<a href="{{ url_for('create_event') }}"><i class="fas fa-plus-circle"></i> Create Event</a>
+<a href="{{ url_for('coordinator_members') }}"><i class="fas fa-users"></i> Members</a>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Mark Attendance</h2>
+  <p>{{ event.event_name }} — {{ event.event_date }}</p>
+</div>
+<div class="form-card">
+  <h3><i class="fas fa-clipboard-check" style="margin-right:8px;color:var(--gold)"></i>
+    Mark students as present — {{ event.points }} pts will be auto-awarded to present students
+  </h3>
+  <form method="POST">
+    {% if registrations %}
+    <div style="margin-bottom:20px;">
+      <button type="button" onclick="checkAll(true)" class="btn btn-success btn-sm">
+        <i class="fas fa-check-double"></i> Select All
+      </button>
+      <button type="button" onclick="checkAll(false)" class="btn btn-outline btn-sm" style="margin-left:8px;">
+        Clear All
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px;">
+      {% for r in registrations %}
+      <label style="display:flex;align-items:center;gap:12px;background:#f8f9fb;padding:14px 16px;border-radius:8px;cursor:pointer;border:1.5px solid #e2e6ed;transition:.15s;"
+             onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='#e2e6ed'">
+        <input type="checkbox" name="present_students" value="{{ r.student_id }}"
+               {% if r.attendance_status == 'present' %}checked{% endif %}
+               style="width:18px;height:18px;accent-color:var(--blue);"/>
+        <div>
+          <div style="font-weight:600;font-size:14px;">{{ r.name }}</div>
+          <div style="font-size:12px;color:var(--muted);">{{ r.reg_no }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary">
+      <i class="fas fa-save"></i> Save Attendance & Award Points
+    </button>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-users"></i>
+      <h4>No students registered for this event yet.</h4>
+    </div>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function checkAll(val) {
+  document.querySelectorAll('input[name="present_students"]').forEach(cb => cb.checked = val);
+}
+</script>
+{% endblock %}

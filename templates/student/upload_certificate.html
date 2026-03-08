@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Upload Certificate — MACE{% endblock %}
+
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Clubs</div>
+<a href="{{ url_for('view_clubs') }}"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('my_clubs') }}"><i class="fas fa-star"></i> My Clubs</a>
+<div class="menu-section">Events</div>
+<a href="{{ url_for('student_events') }}"><i class="fas fa-calendar-alt"></i> Event Timeline</a>
+<a href="{{ url_for('my_events') }}"><i class="fas fa-list-check"></i> My Events</a>
+<div class="menu-section">More</div>
+<a href="{{ url_for('upload_certificate') }}" class="active"><i class="fas fa-certificate"></i> Upload Certificate</a>
+<a href="{{ url_for('activity_points') }}"><i class="fas fa-trophy"></i> Activity Points</a>
+<a href="{{ url_for('student_announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+<a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Upload Certificate</h2>
+  <p>Submit certificates for self-initiative activities to earn activity points</p>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start;">
+
+  <div class="form-card">
+    <h3><i class="fas fa-upload" style="margin-right:8px;color:var(--gold)"></i>Submit Certificate</h3>
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Certificate Type</label>
+        <select name="certificate_type" required>
+          <option value="">-- Select Type --</option>
+          <option value="self_initiative">Self Initiative</option>
+          <option value="event">Event Certificate</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Activity Category</label>
+        <select name="activity_category" required>
+          <option value="">-- Select Category --</option>
+          <option value="internship">Internship (20 pts)</option>
+          <option value="industrial_visit">Industrial Visit (15 pts)</option>
+          <option value="nptel">NPTEL Course (5 pts)</option>
+          <option value="competition_win">Competition Win (5 pts)</option>
+          <option value="workshop">Workshop / Webinar (5 pts)</option>
+          <option value="hackathon">Hackathon (5 pts)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Certificate File (PDF / JPG / PNG)</label>
+        <input type="file" name="certificate_file" accept=".pdf,.jpg,.jpeg,.png" required/>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%">
+        <i class="fas fa-upload"></i> Upload Certificate
+      </button>
+    </form>
+  </div>
+
+  <div>
+    <div class="table-card">
+      <div class="table-card-header"><h3>Points Reference</h3></div>
+      <table>
+        <thead><tr><th>Activity</th><th>Points</th></tr></thead>
+        <tbody>
+          <tr><td>Internship</td><td><strong style="color:#2e7d32">+20</strong></td></tr>
+          <tr><td>Industrial Visit</td><td><strong style="color:#2e7d32">+15</strong></td></tr>
+          <tr><td>NPTEL Course</td><td><strong style="color:#2e7d32">+5</strong></td></tr>
+          <tr><td>Competition Win</td><td><strong style="color:#2e7d32">+5</strong></td></tr>
+          <tr><td>Workshop / Webinar</td><td><strong style="color:#2e7d32">+5</strong></td></tr>
+          <tr><td>Hackathon</td><td><strong style="color:#2e7d32">+5</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <a href="{{ url_for('my_certificates') }}" class="btn btn-outline" style="width:100%;justify-content:center;">
+      <i class="fas fa-list"></i> View My Certificates
+    </a>
+  </div>
+</div>
+{% endblock %}

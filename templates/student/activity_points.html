@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Activity Points — MACE{% endblock %}
+
+{% block sidebar %}
+<div class="menu-section">Main</div>
+<a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Clubs</div>
+<a href="{{ url_for('view_clubs') }}"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('my_clubs') }}"><i class="fas fa-star"></i> My Clubs</a>
+<div class="menu-section">Events</div>
+<a href="{{ url_for('student_events') }}"><i class="fas fa-calendar-alt"></i> Event Timeline</a>
+<a href="{{ url_for('my_events') }}"><i class="fas fa-list-check"></i> My Events</a>
+<div class="menu-section">More</div>
+<a href="{{ url_for('upload_certificate') }}"><i class="fas fa-certificate"></i> Upload Certificate</a>
+<a href="{{ url_for('activity_points') }}" class="active"><i class="fas fa-trophy"></i> Activity Points</a>
+<a href="{{ url_for('student_announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+<a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Activity Points</h2>
+  <p>Your points history and graduation progress</p>
+</div>
+
+<!-- Summary cards -->
+<div class="cards-grid">
+  <div class="stat-card gold">
+    <i class="fas fa-trophy stat-card-icon"></i>
+    <div class="stat-card-value">{{ total_points }}</div>
+    <div class="stat-card-label">Total Points Earned</div>
+  </div>
+  <div class="stat-card {% if total_points >= 100 %}green{% else %}blue{% endif %}">
+    <i class="fas fa-graduation-cap stat-card-icon"></i>
+    <div class="stat-card-value">{{ [100 - total_points, 0] | max }}</div>
+    <div class="stat-card-label">Points Still Needed</div>
+  </div>
+  <div class="stat-card {% if total_points >= 100 %}green{% else %}red{% endif %}">
+    <i class="fas fa-check-circle stat-card-icon"></i>
+    <div class="stat-card-value">{% if total_points >= 100 %}✓{% else %}✗{% endif %}</div>
+    <div class="stat-card-label">Graduation Eligible</div>
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="progress-section">
+  <h4><i class="fas fa-chart-line" style="color:var(--gold);margin-right:8px;"></i>Graduation Progress — 100 AP Required</h4>
+  <div class="progress-wrap">
+    <div class="progress-bar" style="width:{{ progress }}%">
+      <span>{{ progress }}%</span>
+    </div>
+  </div>
+  <div class="progress-meta">
+    <span>{{ total_points }} points earned</span>
+    <span>100 points required</span>
+  </div>
+</div>
+
+<!-- History table -->
+<div class="table-card">
+  <div class="table-card-header">
+    <h3><i class="fas fa-history" style="margin-right:8px;color:var(--gold)"></i>Points History</h3>
+  </div>
+  {% if history %}
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Activity</th>
+          <th>Type</th>
+          <th>Date</th>
+          <th>Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in history %}
+        <tr class="point-row-positive">
+          <td>{{ loop.index }}</td>
+          <td>
+            {% if row.event_name %}
+              <strong>{{ row.event_name }}</strong>
+            {% elif row.activity_category %}
+              <strong>{{ row.activity_category | replace('_',' ') | title }}</strong>
+              <span class="badge badge-info" style="margin-left:6px;">Certificate</span>
+            {% else %}
+              Activity
+            {% endif %}
+          </td>
+          <td>
+            {% if row.event_id %}
+              <span class="badge badge-info">Event</span>
+            {% else %}
+              <span class="badge badge-gold">Self Initiative</span>
+            {% endif %}
+          </td>
+          <td>{{ row.date_awarded.strftime('%d %b %Y') if row.date_awarded else '—' }}</td>
+          <td><strong style="color:#2e7d32;">+{{ row.points }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="fas fa-trophy"></i>
+    <h4>No points earned yet</h4>
+    <p>Attend events or upload certificates to earn activity points.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
