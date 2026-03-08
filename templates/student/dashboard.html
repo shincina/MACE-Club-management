@@ -1,45 +1,168 @@
-<!-- templates/student/dashboard.html -->
 {% extends 'base.html' %}
 {% block title %}Student Dashboard{% endblock %}
 
-
 {% block sidebar %}
-<div class='menu-section'>Main</div>
-<a href='/student/dashboard'><i class='fa fa-home'></i>  Dashboard</a>
-<div class='menu-section'>Clubs</div>
-<a href='/student/clubs'><i class='fa fa-users'></i>  View Clubs</a>
-<a href='/student/my_clubs'><i class='fa fa-star'></i>  My Clubs</a>
-<div class='menu-section'>Events</div>
-<a href='/student/events'><i class='fa fa-calendar'></i>  Event Timeline</a>
-<a href='/student/my_events'><i class='fa fa-list'></i>  My Events</a>
-<div class='menu-section'>More</div>
-<a href='/student/certificates'><i class='fa fa-certificate'></i>  Certificates</a>
-<a href='/student/activity_points'><i class='fa fa-trophy'></i>  Activity Points</a>
-<a href='/student/profile'><i class='fa fa-user'></i>  Profile</a>
+<div class="menu-section">Main</div>
+<a href="{{ url_for('student_dashboard') }}" class="active"><i class="fas fa-home"></i> Dashboard</a>
+<div class="menu-section">Clubs</div>
+<a href="{{ url_for('view_clubs') }}"><i class="fas fa-users"></i> View Clubs</a>
+<a href="{{ url_for('my_clubs') }}"><i class="fas fa-star"></i> My Clubs</a>
+<div class="menu-section">Events</div>
+<a href="{{ url_for('student_events') }}"><i class="fas fa-calendar-alt"></i> Event Timeline</a>
+<a href="{{ url_for('my_events') }}"><i class="fas fa-list-check"></i> My Events</a>
+<div class="menu-section">More</div>
+<a href="{{ url_for('upload_certificate') }}"><i class="fas fa-certificate"></i> Upload Certificate</a>
+<a href="{{ url_for('activity_points') }}"><i class="fas fa-trophy"></i> Activity Points</a>
+<a href="{{ url_for('student_announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+<a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a>
 {% endblock %}
 
-
 {% block content %}
-<h2 style='color:#1B3A6B; margin-bottom:24px;'>Welcome, {{ student.name }}!</h2>
 
-
-<div class='cards-grid'>
-  <div class='card'><div class='card-value'>{{ clubs_count }}</div>
-    <div class='card-label'>Clubs Joined</div></div>
-  <div class='card gold'><div class='card-value'>{{ student.total_points }}</div>
-    <div class='card-label'>Activity Points</div></div>
-  <div class='card'><div class='card-value'>{{ upcoming|length }}</div>
-    <div class='card-label'>Upcoming Events</div></div>
+<!-- Welcome -->
+<div style="margin-bottom:24px;">
+  <h2 style="color:var(--blue); font-size:22px; font-weight:700;">
+    Welcome back, {{ student.name }}! 👋
+  </h2>
+  <p style="color:var(--muted); font-size:13px; margin-top:4px;">
+    {{ student.dept_name }} &nbsp;·&nbsp; {{ student.semester }} &nbsp;·&nbsp; {{ student.reg_no }}
+  </p>
 </div>
 
+<!-- STAT CARDS -->
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:18px; margin-bottom:26px;">
 
-<!-- Progress Bar -->
-<div class='card' style='margin-bottom:20px;'>
-  <b>Graduation Progress (100 AP Required)</b>
-  {% set pct = [student.total_points, 100]|min %}
-  <div class='progress-wrap' style='margin-top:12px;'>
-    <div class='progress-bar' style='width:{{ pct }}%;'></div>
+  <!-- Clubs Joined -->
+  <div style="background:linear-gradient(135deg,#1B3A6B,#2a52a0); border-radius:14px; padding:24px 20px; color:#fff; position:relative; overflow:hidden; box-shadow:0 4px 14px rgba(27,58,107,0.35);">
+    <i class="fas fa-users" style="position:absolute;right:16px;top:16px;font-size:32px;opacity:0.18;"></i>
+    <div style="font-size:38px; font-weight:800; line-height:1;">{{ clubs_count }}</div>
+    <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; margin-top:8px; opacity:.85;">Clubs Joined</div>
+    <div style="font-size:11px; opacity:.6; margin-top:2px;">Max 5 allowed</div>
   </div>
-  <small>{{ student.total_points }} / 100 points</small>
+
+  <!-- Activity Points -->
+  <div style="background:linear-gradient(135deg,#C8902A,#e8a83a); border-radius:14px; padding:24px 20px; color:#fff; position:relative; overflow:hidden; box-shadow:0 4px 14px rgba(200,144,42,0.40);">
+    <i class="fas fa-trophy" style="position:absolute;right:16px;top:16px;font-size:32px;opacity:0.18;"></i>
+    <div style="font-size:38px; font-weight:800; line-height:1;">{{ student.total_points }}</div>
+    <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; margin-top:8px; opacity:.85;">Activity Points</div>
+    <div style="font-size:11px; opacity:.6; margin-top:2px;">100 needed to graduate</div>
+  </div>
+
+  <!-- Upcoming Events -->
+  <div style="background:linear-gradient(135deg,#1a7a4a,#26a96a); border-radius:14px; padding:24px 20px; color:#fff; position:relative; overflow:hidden; box-shadow:0 4px 14px rgba(26,122,74,0.35);">
+    <i class="fas fa-calendar-alt" style="position:absolute;right:16px;top:16px;font-size:32px;opacity:0.18;"></i>
+    <div style="font-size:38px; font-weight:800; line-height:1;">{{ upcoming_events|length }}</div>
+    <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; margin-top:8px; opacity:.85;">Upcoming Events</div>
+    <div style="font-size:11px; opacity:.6; margin-top:2px;">Events you registered for</div>
+  </div>
+
+  <!-- Points Needed -->
+  <div style="background:linear-gradient(135deg,#7b1fa2,#ab47bc); border-radius:14px; padding:24px 20px; color:#fff; position:relative; overflow:hidden; box-shadow:0 4px 14px rgba(123,31,162,0.35);">
+    <i class="fas fa-graduation-cap" style="position:absolute;right:16px;top:16px;font-size:32px;opacity:0.18;"></i>
+    <div style="font-size:38px; font-weight:800; line-height:1;">{{ [100 - student.total_points, 0]|max }}</div>
+    <div style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; margin-top:8px; opacity:.85;">Points Needed</div>
+    <div style="font-size:11px; opacity:.6; margin-top:2px;">
+      {% if student.total_points >= 100 %}Graduation eligible!{% else %}Keep going!{% endif %}
+    </div>
+  </div>
+
 </div>
+
+<!-- GRADUATION PROGRESS -->
+<div style="background:#fff; border-radius:14px; padding:22px 24px; margin-bottom:24px; box-shadow:0 1px 6px rgba(0,0,0,.07);">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <span style="font-size:14px; font-weight:700; color:var(--blue);">
+      <i class="fas fa-chart-line" style="color:var(--gold); margin-right:8px;"></i>Graduation Progress
+    </span>
+    <span style="font-size:13px; font-weight:700; color:var(--gold);">{{ student.total_points }} / 100 AP</span>
+  </div>
+  {% set pct = [student.total_points, 100]|min %}
+  <div style="background:#e8ecf2; border-radius:20px; height:22px; overflow:hidden;">
+    <div style="width:{{ pct }}%; height:100%; border-radius:20px;
+                background:linear-gradient(90deg,var(--blue),var(--gold));
+                display:flex; align-items:center; justify-content:flex-end; padding-right:10px;
+                transition:width .5s ease;">
+      {% if pct > 10 %}<span style="font-size:11px; font-weight:700; color:#fff;">{{ pct }}%</span>{% endif %}
+    </div>
+  </div>
+  <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color:var(--muted);">
+    <span>0 pts</span>
+    <span>
+      {% if student.total_points >= 100 %}
+        <span style="color:#2e7d32; font-weight:700;"><i class="fas fa-check-circle"></i> Eligible for Graduation!</span>
+      {% else %}
+        {{ 100 - student.total_points }} more points needed
+      {% endif %}
+    </span>
+    <span>100 pts</span>
+  </div>
+</div>
+
+<!-- BOTTOM GRID: Upcoming Events + Announcements -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:22px;">
+
+  <!-- Upcoming Events -->
+  <div style="background:#fff; border-radius:14px; box-shadow:0 1px 6px rgba(0,0,0,.07); overflow:hidden;">
+    <div style="padding:16px 20px; border-bottom:1px solid #e2e6ed; display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="font-size:14px; font-weight:700; color:var(--blue);">
+        <i class="fas fa-calendar-check" style="color:var(--gold); margin-right:8px;"></i>Upcoming Events
+      </h3>
+      <a href="{{ url_for('student_events') }}" style="font-size:12px; color:var(--blue); text-decoration:none; font-weight:600;">View All →</a>
+    </div>
+    {% if upcoming_events %}
+      {% for e in upcoming_events %}
+      <div style="padding:14px 20px; border-bottom:1px solid #f0f2f5; display:flex; align-items:center; gap:14px;">
+        <div style="width:42px; height:42px; border-radius:10px; background:var(--blue); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <i class="fas fa-calendar-day" style="color:#fff; font-size:16px;"></i>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ e.event_name }}</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:2px;">{{ e.club_name }} &nbsp;·&nbsp; {{ e.event_date }}</div>
+        </div>
+        <span style="background:#fff3e0; color:#7a4500; font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px; white-space:nowrap;">+{{ e.points }} pts</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div style="padding:40px 20px; text-align:center; color:var(--muted);">
+        <i class="fas fa-calendar" style="font-size:32px; opacity:.2; display:block; margin-bottom:10px;"></i>
+        <div style="font-size:13px;">No upcoming events</div>
+        <a href="{{ url_for('student_events') }}" style="font-size:12px; color:var(--blue); font-weight:600;">Browse events →</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Announcements (from clubs only, not admin) -->
+  <div style="background:#fff; border-radius:14px; box-shadow:0 1px 6px rgba(0,0,0,.07); overflow:hidden;">
+    <div style="padding:16px 20px; border-bottom:1px solid #e2e6ed; display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="font-size:14px; font-weight:700; color:var(--blue);">
+        <i class="fas fa-bullhorn" style="color:var(--gold); margin-right:8px;"></i>Announcements
+      </h3>
+      <a href="{{ url_for('student_announcements') }}" style="font-size:12px; color:var(--blue); text-decoration:none; font-weight:600;">View All →</a>
+    </div>
+    {% if announcements %}
+      {% for a in announcements %}
+      <div style="padding:14px 20px; border-bottom:1px solid #f0f2f5; border-left:3px solid var(--gold);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+          <div style="font-size:13px; font-weight:600; color:var(--text);">{{ a.title }}</div>
+          <span style="font-size:10px; color:var(--muted); white-space:nowrap; margin-top:2px;">
+            {{ a.created_date.strftime('%d %b') if a.created_date else '' }}
+          </span>
+        </div>
+        {% if a.club_name %}
+        <span style="display:inline-block; background:#e3f2fd; color:#0d47a1; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; margin-top:4px;">{{ a.club_name }}</span>
+        {% endif %}
+        <p style="font-size:12px; color:#666; margin-top:6px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ a.message }}</p>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div style="padding:40px 20px; text-align:center; color:var(--muted);">
+        <i class="fas fa-bullhorn" style="font-size:32px; opacity:.2; display:block; margin-bottom:10px;"></i>
+        <div style="font-size:13px;">No announcements yet</div>
+        <div style="font-size:12px; margin-top:4px;">Join clubs to see their announcements</div>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
 {% endblock %}
