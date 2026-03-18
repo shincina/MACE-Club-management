@@ -1,0 +1,368 @@
+{% extends "student/base.html" %}
+{% block title %}My Certificates — MACE{% endblock %}
+
+{% block content %}
+
+{# ══════════════════════════════════════════════════
+   LIGHTBOX — shown when Preview is clicked
+   ══════════════════════════════════════════════════ #}
+<div id="lb" class="lb" onclick="lbClose(event)">
+  <div class="lb-box">
+    <div class="lb-top">
+      <span id="lb-name" class="lb-name"></span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <a id="lb-dl" href="#" download class="lb-dl-btn">⬇ Download</a>
+        <button class="lb-x" onclick="lbClose()">&times;</button>
+      </div>
+    </div>
+    <div class="lb-body" id="lb-body">
+      <div class="lb-spin">Loading…</div>
+    </div>
+  </div>
+</div>
+
+{# ══════════════════════════════════════════════════
+   PAGE HEADER
+   ══════════════════════════════════════════════════ #}
+<div class="ph">
+  <div>
+    <h1 class="ph-title">My Certificates</h1>
+    <p class="ph-sub">View, preview and download your uploaded certificates</p>
+  </div>
+  <a href="{{ url_for('upload_certificate') }}" class="btn-upload">+ Upload New</a>
+</div>
+
+{# ══════════════════════════════════════════════════
+   STATS ROW
+   ══════════════════════════════════════════════════ #}
+<div class="stats-row">
+  <div class="stat-box"><span class="stat-n">{{ counts.total or 0 }}</span><span class="stat-l">Total</span></div>
+  <div class="stat-box stat-pend"><span class="stat-n">{{ counts.pending or 0 }}</span><span class="stat-l">Pending</span></div>
+  <div class="stat-box stat-appr"><span class="stat-n">{{ counts.approved or 0 }}</span><span class="stat-l">Approved</span></div>
+  <div class="stat-box stat-rej"><span class="stat-n">{{ counts.rejected or 0 }}</span><span class="stat-l">Rejected</span></div>
+  <div class="stat-box stat-pts"><span class="stat-n">{{ counts.total_points_from_certs or 0 }}</span><span class="stat-l">Points Earned</span></div>
+</div>
+
+{# ══════════════════════════════════════════════════
+   FILTER BAR
+   ══════════════════════════════════════════════════ #}
+<form method="GET" action="{{ url_for('my_certificates') }}" class="fbar">
+  <div class="fg">
+    <span class="fl">Status</span>
+    {% for v,l in [('all','All'),('pending','Pending'),('approved','Approved'),('rejected','Rejected')] %}
+      <button type="submit" name="status" value="{{ v }}"
+        class="fc {{ 'fc-on' if status_filter==v else '' }}">
+        {{ l }}{% if v!='all' %}<em>{{ counts[v] or 0 }}</em>{% endif %}
+      </button>
+    {% endfor %}
+  </div>
+  <div class="fdiv"></div>
+  <div class="fg">
+    <span class="fl">Type</span>
+    {% for v,l in [('all','All'),('event','Club Event'),('self_initiative','Self-Initiative')] %}
+      <button type="submit" name="cert_type" value="{{ v }}"
+        class="fc {{ 'fc-on' if type_filter==v else '' }}">{{ l }}</button>
+    {% endfor %}
+  </div>
+  {# Keep the other filter when toggling one #}
+  {% if request.args.get('cert_type') %}<input type="hidden" name="cert_type" value="{{ type_filter }}">{% endif %}
+  {% if request.args.get('status')    %}<input type="hidden" name="status"    value="{{ status_filter }}">{% endif %}
+</form>
+
+{# ══════════════════════════════════════════════════
+   CERTIFICATE CARDS
+   ══════════════════════════════════════════════════ #}
+{% if certificates %}
+<div class="grid">
+  {% for c in certificates %}
+
+  {# Build file URL — cert.file_path holds just the filename #}
+  {% set fname   = c.file_path|string %}
+  {% set ext     = fname.rsplit('.',1)[-1].lower() if '.' in fname else '' %}
+  {% set furl    = url_for('serve_upload', filename=fname) %}
+  {% set catname = c.activity_category|replace('_',' ')|title %}
+
+  <div class="card s-{{ c.status }}">
+
+    {# ── THUMBNAIL ─────────────────────────────────────────────────────── #}
+    <div class="thumb" onclick="lbOpen('{{ furl }}','{{ ext }}','{{ catname }}')">
+
+      {% if ext in ['jpg','jpeg','png','webp'] %}
+        <img src="{{ furl }}" alt="{{ catname }}" class="timg"
+             loading="lazy"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="ticon tpdf" style="display:none">
+          <span>🖼️</span><small>Image</small>
+        </div>
+      {% elif ext == 'pdf' %}
+        <div class="ticon tpdf"><span>📄</span><small>PDF</small></div>
+      {% else %}
+        <div class="ticon tother"><span>📎</span><small>{{ ext|upper or 'File' }}</small></div>
+      {% endif %}
+
+      <div class="thover"><span class="tpill">🔍 Preview</span></div>
+
+      {# Status ribbon #}
+      <div class="ribbon r-{{ c.status }}">
+        {% if c.status=='pending'  %}⏳ Pending
+        {% elif c.status=='approved' %}✅ Approved
+        {% else %}❌ Rejected{% endif %}
+      </div>
+
+      {# Points badge — approved only #}
+      {% if c.status=='approved' and c.points_awarded %}
+        <div class="ptsbadge">+{{ c.points_awarded }} pts</div>
+      {% endif %}
+
+    </div>{# end thumb #}
+
+    {# ── CARD INFO ─────────────────────────────────────────────────────── #}
+    <div class="cinfo">
+      <div class="ccat">{{ catname }}</div>
+
+      <span class="ctag {{ 'ctag-ev' if c.certificate_type=='event' else 'ctag-si' }}">
+        {{ '🏆 Club Event' if c.certificate_type=='event' else '📜 Self-Initiative' }}
+      </span>
+
+      {% if c.event_name %}
+      <div class="cmeta">📅 {{ c.event_name }}{% if c.club_name %} · {{ c.club_name }}{% endif %}</div>
+      {% endif %}
+
+      <div class="cmeta">📤 Uploaded {{ c.upload_date.strftime('%d %b %Y') }}</div>
+
+      {% if c.verified_by_name %}
+      <div class="cmeta">👤 {{ c.verified_by_name }}</div>
+      {% endif %}
+
+      {% if c.remarks %}
+      <div class="cremark">💬 {{ c.remarks }}</div>
+      {% endif %}
+    </div>
+
+    {# ── FOOTER BUTTONS ────────────────────────────────────────────────── #}
+    <div class="cfoot">
+      <button class="cfb cfb-prev"
+        onclick="lbOpen('{{ furl }}','{{ ext }}','{{ catname }}')">🔍 Preview</button>
+      <a href="{{ url_for('certificate_detail', cert_id=c.certificate_id) }}"
+         class="cfb cfb-det">📋 Details</a>
+      <a href="{{ furl }}" download="{{ fname }}" class="cfb cfb-dl">⬇ Download</a>
+    </div>
+
+  </div>{# end card #}
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty">
+  <div style="font-size:3rem;margin-bottom:10px">📂</div>
+  <p style="font-weight:700;color:#1e293b;margin:0 0 6px">No certificates found</p>
+  <p style="color:#64748b;font-size:.875rem;margin:0 0 18px">
+    {% if status_filter!='all' or type_filter!='all' %}
+      No results for the selected filters. <a href="{{ url_for('my_certificates') }}">Clear filters</a>
+    {% else %}
+      You haven't uploaded any certificates yet.
+    {% endif %}
+  </p>
+  <a href="{{ url_for('upload_certificate') }}" class="btn-upload">Upload Certificate</a>
+</div>
+{% endif %}
+
+{# ══════════════════════════════════════════════════
+   STYLES
+   ══════════════════════════════════════════════════ #}
+<style>
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:12px}
+.ph-title{font-size:1.5rem;font-weight:700;color:#0f172a;margin:0}
+.ph-sub{color:#64748b;font-size:.875rem;margin:4px 0 0}
+.btn-upload{background:#1e3a5f;color:#fff;padding:9px 18px;border-radius:8px;
+            font-size:.875rem;font-weight:600;text-decoration:none;white-space:nowrap;
+            border:none;cursor:pointer;display:inline-block}
+.btn-upload:hover{background:#163055}
+
+/* ── Stats ────────────────────────────────────────────────────────────────── */
+.stats-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat-box{flex:1;min-width:90px;background:#fff;border:1px solid #e2e8f0;
+          border-top:3px solid #94a3b8;border-radius:10px;padding:12px 14px;
+          display:flex;flex-direction:column;align-items:center;gap:2px}
+.stat-pend{border-top-color:#f59e0b}.stat-appr{border-top-color:#10b981}
+.stat-rej{border-top-color:#ef4444}.stat-pts{border-top-color:#6366f1}
+.stat-n{font-size:1.5rem;font-weight:800;color:#0f172a;line-height:1}
+.stat-l{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:#64748b}
+
+/* ── Filter bar ───────────────────────────────────────────────────────────── */
+.fbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+      background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;
+      padding:10px 14px;margin-bottom:20px}
+.fg{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.fdiv{width:1px;height:22px;background:#e2e8f0;margin:0 8px}
+.fl{font-size:.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;
+    letter-spacing:.06em;white-space:nowrap;margin-right:2px}
+.fc{padding:4px 12px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;
+    font-size:.78rem;cursor:pointer;color:#475569;display:inline-flex;align-items:center;
+    gap:4px;transition:all .15s;white-space:nowrap}
+.fc:hover{background:#f1f5f9}
+.fc-on{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+.fc em{background:rgba(0,0,0,.1);border-radius:10px;padding:0 5px;
+       font-style:normal;font-size:.68rem;font-weight:700}
+.fc-on em{background:rgba(255,255,255,.25)}
+
+/* ── Card grid ────────────────────────────────────────────────────────────── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;
+      display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(0,0,0,.06);
+      transition:box-shadow .2s,transform .2s}
+.card:hover{box-shadow:0 6px 20px rgba(0,0,0,.1);transform:translateY(-3px)}
+.card.s-approved{border-top:3px solid #10b981}
+.card.s-pending {border-top:3px solid #f59e0b}
+.card.s-rejected{border-top:3px solid #ef4444}
+
+/* ── Thumbnail ────────────────────────────────────────────────────────────── */
+.thumb{position:relative;height:160px;overflow:hidden;background:#f1f5f9;
+       cursor:pointer;display:flex;align-items:center;justify-content:center}
+.timg{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.card:hover .timg{transform:scale(1.05)}
+
+.ticon{display:flex;flex-direction:column;align-items:center;justify-content:center;
+       gap:7px;width:100%;height:100%}
+.tpdf {background:linear-gradient(135deg,#ede9fe 0%,#ddd6fe 100%)}
+.tother{background:linear-gradient(135deg,#e0f2fe 0%,#bae6fd 100%)}
+.ticon span{font-size:2.8rem}
+.ticon small{font-size:.75rem;font-weight:600;color:#7c3aed}
+.tother small{color:#0369a1}
+
+.thover{position:absolute;inset:0;background:rgba(15,23,42,.5);
+        display:flex;align-items:center;justify-content:center;
+        opacity:0;transition:opacity .2s}
+.thumb:hover .thover{opacity:1}
+.tpill{color:#fff;font-size:.82rem;font-weight:700;padding:6px 16px;border-radius:20px;
+       border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);
+       backdrop-filter:blur(4px)}
+
+.ribbon{position:absolute;top:10px;left:0;font-size:.65rem;font-weight:700;
+        padding:3px 10px 3px 8px;border-radius:0 20px 20px 0;white-space:nowrap}
+.r-pending {background:#fef3c7;color:#92400e}
+.r-approved{background:#dcfce7;color:#166534}
+.r-rejected{background:#fee2e2;color:#991b1b}
+
+.ptsbadge{position:absolute;top:10px;right:10px;background:#059669;color:#fff;
+          font-size:.68rem;font-weight:800;padding:3px 8px;border-radius:20px;
+          box-shadow:0 2px 6px rgba(5,150,105,.4)}
+
+/* ── Info area ────────────────────────────────────────────────────────────── */
+.cinfo{padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:5px}
+.ccat{font-size:.92rem;font-weight:700;color:#0f172a}
+.ctag{font-size:.68rem;font-weight:600;padding:2px 9px;border-radius:20px;
+      align-self:flex-start;margin-bottom:1px}
+.ctag-ev{background:#ede9fe;color:#7c3aed}
+.ctag-si{background:#dbeafe;color:#1d4ed8}
+.cmeta{font-size:.76rem;color:#64748b;line-height:1.4}
+.cremark{font-size:.72rem;color:#475569;background:#f8fafc;border-radius:6px;
+         padding:5px 8px;border-left:3px solid #cbd5e1;font-style:italic}
+
+/* ── Footer buttons ───────────────────────────────────────────────────────── */
+.cfoot{display:flex;border-top:1px solid #f1f5f9}
+.cfb{flex:1;padding:9px 4px;text-align:center;font-size:.74rem;font-weight:600;
+     cursor:pointer;border:none;background:transparent;color:#475569;
+     text-decoration:none;transition:background .15s;
+     display:flex;align-items:center;justify-content:center;gap:3px}
+.cfb+.cfb{border-left:1px solid #f1f5f9}
+.cfb:hover{background:#f8fafc}
+.cfb-prev:hover{color:#6366f1}
+.cfb-det:hover {color:#0891b2}
+.cfb-dl:hover  {color:#059669}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+.empty{text-align:center;padding:64px 20px;color:#64748b}
+
+/* ══════════════════════════════════════════════════
+   LIGHTBOX
+   ══════════════════════════════════════════════════ */
+.lb{display:none;position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,.82);align-items:center;justify-content:center;
+    backdrop-filter:blur(5px)}
+.lb.open{display:flex;animation:lbIn .18s ease}
+@keyframes lbIn{from{opacity:0}to{opacity:1}}
+
+.lb-box{background:#16213e;border-radius:14px;width:min(900px,95vw);max-height:94vh;
+        display:flex;flex-direction:column;overflow:hidden;
+        box-shadow:0 20px 70px rgba(0,0,0,.7);
+        animation:lbUp .22s ease}
+@keyframes lbUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.lb-top{display:flex;align-items:center;justify-content:space-between;
+        padding:12px 18px;background:#0f172a;border-bottom:1px solid rgba(255,255,255,.07);
+        flex-shrink:0}
+.lb-name{font-size:.88rem;font-weight:700;color:#e2e8f0}
+.lb-dl-btn{background:#059669;color:#fff;padding:5px 14px;border-radius:7px;
+           font-size:.78rem;font-weight:600;text-decoration:none;border:none;cursor:pointer}
+.lb-dl-btn:hover{background:#047857}
+.lb-x{background:rgba(255,255,255,.1);border:none;color:#e2e8f0;width:28px;height:28px;
+      border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;
+      justify-content:center;transition:background .15s;margin-left:8px}
+.lb-x:hover{background:rgba(255,255,255,.2)}
+
+.lb-body{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;
+         padding:16px;min-height:300px;background:#0a0f1e}
+.lb-body img{max-width:100%;max-height:78vh;border-radius:8px;object-fit:contain;
+             box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.lb-body iframe{width:100%;height:78vh;border:none;border-radius:6px}
+.lb-spin{color:#94a3b8;font-size:.9rem}
+.lb-err{color:#94a3b8;text-align:center;padding:40px}
+.lb-err span{font-size:3rem;display:block;margin-bottom:10px}
+</style>
+
+{# ══════════════════════════════════════════════════
+   LIGHTBOX JS
+   ══════════════════════════════════════════════════ #}
+<script>
+function lbOpen(url, ext, name) {
+  const body = document.getElementById('lb-body');
+  document.getElementById('lb-name').textContent = name;
+  document.getElementById('lb-dl').href     = url;
+  document.getElementById('lb-dl').download = url.split('/').pop();
+  body.innerHTML = '<div class="lb-spin">Loading…</div>';
+  document.getElementById('lb').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const imgs = ['jpg','jpeg','png','gif','webp'];
+  if (imgs.includes(ext)) {
+    const img   = new Image();
+    img.onload  = () => { body.innerHTML = ''; body.appendChild(img); };
+    img.onerror = () => {
+      body.innerHTML = '<div class="lb-err"><span>⚠️</span>Image could not be loaded.<br>'
+        + '<a href="' + url + '" download style="color:#38bdf8">Download instead</a></div>';
+    };
+    img.style.cssText = 'max-width:100%;max-height:78vh;border-radius:8px;object-fit:contain;box-shadow:0 8px 32px rgba(0,0,0,.6)';
+    img.alt = name;
+    img.src = url;
+
+  } else if (ext === 'pdf') {
+    body.innerHTML = '';
+    const f = document.createElement('iframe');
+    f.src   = url;
+    f.title = name;
+    f.style.cssText = 'width:100%;height:78vh;border:none;border-radius:6px';
+    body.appendChild(f);
+
+  } else {
+    body.innerHTML = '<div class="lb-err"><span>📎</span>No preview for .'
+      + (ext||'this file type') + '.<br>'
+      + '<a href="' + url + '" download style="color:#38bdf8">Download to view</a></div>';
+  }
+}
+
+function lbClose(e) {
+  if (e && e.target.closest && e.target.closest('.lb-box') &&
+      !e.target.classList.contains('lb-x')) return;
+  document.getElementById('lb').classList.remove('open');
+  document.getElementById('lb-body').innerHTML = '<div class="lb-spin">Loading…</div>';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') lbClose();
+});
+</script>
+{% endblock %}
